@@ -195,7 +195,7 @@ vim.keymap.set('n', '<leader>gc', function()
 end, { desc = 'Make a git commit with --all' })
 
 vim.keymap.set('n', '<leader>gp', function()
-  require('neogit').action('push', 'push')
+  require('neogit').action('push', 'to_upstream')()
 end, { desc = 'Do a git push' })
 
 -- [[ Basic Autocommands ]]
