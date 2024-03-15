@@ -193,6 +193,11 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.keymap.set('n', '<leader>gc', function()
   require('neogit').action('commit', 'commit', { '--all' })()
 end, { desc = 'Make a git commit with --all' })
+
+vim.keymap.set('n', '<leader>gp', function()
+  require('neogit').action('push', 'push')
+end, { desc = 'Do a git push' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
