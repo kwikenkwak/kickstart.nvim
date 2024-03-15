@@ -190,6 +190,9 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+vim.keymap.set('n', '<C-n>', ':bn<Enter>', { desc = 'Go to the next buffer' })
+vim.keymap.set('n', '<C-p>', ':bp<Enter>', { desc = 'Go to the previous buffer' })
+
 vim.keymap.set('n', '<leader>gc', function()
   require('neogit').action('commit', 'commit', { '--all' })()
 end, { desc = 'Make a git commit with --all' })
@@ -197,6 +200,11 @@ end, { desc = 'Make a git commit with --all' })
 vim.keymap.set('n', '<leader>gp', function()
   require('neogit').action('push', 'to_upstream')()
 end, { desc = 'Do a git push' })
+
+vim.keymap.set('n', '<leader>gv', ':!git add -A && git diff --cached | more <Enter>', { desc = 'Show current changes' })
+vim.keymap.set('n', '<leader>gd', function()
+  require('neogit').open { 'diff' }
+end, { desc = 'Show current changes' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -520,7 +528,7 @@ require('lazy').setup({
 
           -- Opens a popup that displays documentation about the word under your cursor
           --  See `:help K` for why this keymap
-          map('K', vim.lsp.buf.hover, 'Hover Documentation')
+          map('E', vim.lsp.buf.hover, 'Hover Documentation')
 
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header
