@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -193,6 +193,11 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.keymap.set('n', '<C-n>', ':bn<Enter>', { desc = 'Go to the next buffer' })
 vim.keymap.set('n', '<C-p>', ':bp<Enter>', { desc = 'Go to the previous buffer' })
 vim.keymap.set('i', 'jk', '<Esc>', { desc = 'Press jk to exit insert mode' })
+
+vim.opt.guifont = 'BitstreamVeraSansMono Nerd Font:h15'
+
+-- Set fold to indent
+vim.opt.foldmethod = 'indent'
 
 vim.keymap.set('n', '<leader>gc', function()
   require('neogit').action('commit', 'commit', { '--all' })()
@@ -653,6 +658,9 @@ require('lazy').setup({
         timeout_ms = 500,
         lsp_fallback = true,
       },
+      format_after_save = {
+        lsp_fallback = true,
+      },
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
@@ -773,6 +781,7 @@ require('lazy').setup({
     end,
   },
 
+  { 'rebelot/kanagawa.nvim' },
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is
