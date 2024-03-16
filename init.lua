@@ -268,6 +268,10 @@ require('lazy').setup({
     config = function()
       require('copilot').setup {
         suggestion = { auto_trigger = true, keymap = { accept = 'Z' } },
+        filetypes = {
+          systemverilog = false,
+          ['*'] = true,
+        },
       }
     end,
   },
@@ -601,6 +605,7 @@ require('lazy').setup({
         -- But for many setups, the LSP (`tsserver`) will work just fine
         tsserver = {},
         eslint = {},
+        verible = {},
         --
 
         lua_ls = {
@@ -781,6 +786,17 @@ require('lazy').setup({
     end,
   },
 
+  { 'ellisonleao/gruvbox.nvim' },
+  { 'nyoom-engineering/nyoom.nvim' },
+  { 'jacoborus/tender.vim' },
+  { 'nyoom-engineering/oxocarbon.nvim' },
+  { 'bluz71/vim-nightfly-colors' },
+  { 'savq/melange-nvim' },
+  { 'AlexvZyl/nordic.nvim' },
+  { 'rmehri01/onenord.nvim' },
+  { 'patstockwell/vim-monokai-tasty' },
+  { 'luisiacc/gruvbox-baby' },
+  { 'shatur/neovim-ayu' },
   { 'rebelot/kanagawa.nvim' },
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
@@ -794,7 +810,31 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'catppuccin-macchiato'
+      local possible_colorschemes = {
+        'catppuccin-macchiato',
+        'gruvbox-baby',
+        'ayu',
+        'ayu-mirage',
+        'catppuccin-mocha',
+        'catppuccin-frappe',
+        'catppuccin-macchiato',
+        'catppuccin-latte',
+        'gruvbox',
+        'kanagawa-dragon',
+        'kanagawa-lotus',
+        'kanagawa-wave',
+        'melange',
+        'minicyan',
+        'minischeme',
+        'nightfly',
+        'nordic',
+        'randomhue',
+        'oxocarbon',
+        'onenord-light',
+        'onenord',
+      }
+      math.randomseed(os.time())
+      vim.cmd.colorscheme(possible_colorschemes[math.random(#possible_colorschemes)])
 
       -- You can configure highlights by doing something like
       vim.cmd.hi 'Comment gui=none'
