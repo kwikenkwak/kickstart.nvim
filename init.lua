@@ -404,7 +404,10 @@ require('lazy').setup({
         --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
         --   },
         -- },
-        -- pickers = {}
+        pickers = {
+          live_grep = { additional_args = { '--hidden' } },
+          grep_string = { additional_args = { '--hidden' } },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -604,6 +607,8 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
         tsserver = {},
+        graphql = {},
+        tailwindcss = {},
         eslint = {},
         verible = {},
         --
@@ -789,7 +794,6 @@ require('lazy').setup({
   { 'ellisonleao/gruvbox.nvim' },
   { 'nyoom-engineering/nyoom.nvim' },
   { 'jacoborus/tender.vim' },
-  { 'nyoom-engineering/oxocarbon.nvim' },
   { 'bluz71/vim-nightfly-colors' },
   { 'savq/melange-nvim' },
   { 'AlexvZyl/nordic.nvim' },
@@ -813,7 +817,6 @@ require('lazy').setup({
       local possible_colorschemes = {
         'catppuccin-macchiato',
         'gruvbox-baby',
-        'ayu',
         'ayu-mirage',
         'catppuccin-mocha',
         'catppuccin-frappe',
@@ -829,7 +832,6 @@ require('lazy').setup({
         'nightfly',
         'nordic',
         'randomhue',
-        'oxocarbon',
         'onenord-light',
         'onenord',
       }
