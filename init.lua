@@ -212,6 +212,9 @@ vim.keymap.set('n', '<leader>gd', function()
   require('neogit').open { 'diff' }
 end, { desc = 'Show current changes' })
 
+vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { desc = 'Move the selected lines down' })
+vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { desc = 'Move the selected lines up' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -460,6 +463,15 @@ require('lazy').setup({
     end,
   },
 
+  {
+    'jiaoshijie/undotree',
+    dependencies = 'nvim-lua/plenary.nvim',
+    config = true,
+    keys = { -- load the plugin only when using it's keybinding:
+      { '<leader>u', "<cmd>lua require('undotree').toggle()<cr>" },
+    },
+  },
+
   { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -665,6 +677,7 @@ require('lazy').setup({
     'stevearc/conform.nvim',
     opts = {
       notify_on_error = false,
+      fix_on_save = true,
       format_on_save = {
         timeout_ms = 500,
         lsp_fallback = true,
@@ -679,10 +692,10 @@ require('lazy').setup({
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        javascript = { 'prettier' },
-        javascriptreact = { 'prettier' },
-        typescript = { 'prettier' },
-        typescriptreact = { 'prettier' },
+        javascript = { 'prettier', 'eslint_d' },
+        javascriptreact = { 'prettier', 'eslint_d' },
+        typescript = { 'prettier', 'eslint_d' },
+        typescriptreact = { 'prettier', 'eslint_d' },
       },
     },
   },
