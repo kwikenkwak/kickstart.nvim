@@ -216,6 +216,7 @@ vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { desc = 'Move the selected lines d
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { desc = 'Move the selected lines up' })
 
 vim.keymap.set('n', '<leader>t', '<Cmd>Neotree toggle<CR>', { desc = '[T]oggle Neotree' })
+vim.keymap.set('n', '<leader>f', '<Cmd>Neotree reveal<CR>', { desc = 'Reveal current [f]ile in Neotree' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -275,6 +276,7 @@ require('lazy').setup({
         suggestion = { auto_trigger = true, keymap = { accept = 'Z' } },
         filetypes = {
           systemverilog = false,
+          c = false,
           ['*'] = true,
         },
       }
@@ -323,6 +325,24 @@ require('lazy').setup({
       'MunifTanjim/nui.nvim',
       -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
     },
+  },
+  {
+    'akinsho/flutter-tools.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'stevearc/dressing.nvim',
+    },
+    config = true,
+  },
+  {
+    'dart-lang/dart-vim-plugin',
+  },
+  {
+    'napmn/react-extract.nvim',
+    config = function()
+      require('react-extract').setup {}
+      vim.keymap.set({ 'v' }, '<leader>ec', require('react-extract').extract_to_new_file)
+    end,
   },
 
   -- NOTE: Plugins can also be configured to run lua code when they are loaded.
@@ -575,7 +595,8 @@ require('lazy').setup({
           -- Execute a code action, usually your cursor needs to be on top of an error
           -- or a suggestion from your LSP for this to activate.
           map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-
+          -- Also in visual mode
+          vim.keymap.set('v', '<leader>ca', vim.lsp.buf.code_action, { buffer = event.buf, desc = 'LSP: [C]ode [A]ction' })
           -- Opens a popup that displays documentation about the word under your cursor
           --  See `:help K` for why this keymap
           map('E', vim.lsp.buf.hover, 'Hover Documentation')
@@ -633,6 +654,7 @@ require('lazy').setup({
         -- But for many setups, the LSP (`tsserver`) will work just fine
         tsserver = {},
         graphql = {},
+        clangd = {},
         tailwindcss = {},
         eslint = {},
         verible = {},
@@ -848,13 +870,11 @@ require('lazy').setup({
         'catppuccin-frappe',
         'catppuccin-macchiato',
         'catppuccin-latte',
-        'gruvbox',
         'kanagawa-dragon',
         'kanagawa-lotus',
         'kanagawa-wave',
         'melange',
         'minicyan',
-        'minischeme',
         'nightfly',
         'nordic',
         'randomhue',
