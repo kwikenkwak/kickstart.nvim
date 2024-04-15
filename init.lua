@@ -198,6 +198,7 @@ vim.opt.guifont = 'BitstreamVeraSansMono Nerd Font:h15'
 
 -- Set fold to indent
 vim.opt.foldmethod = 'indent'
+vim.opt.foldlevelstart = 99
 
 vim.keymap.set('n', '<leader>gc', function()
   require('neogit').action('commit', 'commit', { '--all' })()
