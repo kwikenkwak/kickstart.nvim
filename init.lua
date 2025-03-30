@@ -133,7 +133,7 @@ vim.opt.updatetime = 250
 
 -- Decrease mapped sequence wait time
 -- Displays which-key popup sooner
-vim.opt.timeoutlen = 300
+vim.opt.timeoutlen = 1000
 
 -- Configure how new splits should be opened
 vim.opt.splitright = true
@@ -166,6 +166,9 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+vim.keymap.set('n', ']g', vim.diagnostic.goto_next)
+vim.keymap.set('n', '[g', vim.diagnostic.goto_prev)
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -200,6 +203,11 @@ vim.opt.guifont = 'BitstreamVeraSansMono Nerd Font:h15'
 vim.opt.foldmethod = 'indent'
 vim.opt.foldlevelstart = 99
 
+vim.g.neovide_background_transparency = 0.5
+vim.g.neovide_remember_window_position = true
+vim.g.neovide_remember_window_size = true
+vim.g.neovide_background_image = '/home/willem/Documents/rosepinesharp.png'
+
 vim.keymap.set('n', '<leader>gc', function()
   require('neogit').action('commit', 'commit', { '--all' })()
 end, { desc = 'Make a git commit with --all' })
@@ -232,6 +240,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank()
   end,
 })
+
+-- Setup autosession options, these are the recommended options
+vim.o.sessionoptions = 'blank,buffers,curdir,help,tabpages,winsize,winpos,terminal,localoptions,resize'
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -277,13 +288,26 @@ require('lazy').setup({
         suggestion = { auto_trigger = true, keymap = { accept = 'Z' } },
         filetypes = {
           systemverilog = false,
+          -- python = false,
           c = false,
           ['*'] = true,
         },
       }
     end,
   },
-
+  {
+    'stevearc/oil.nvim',
+    config = function()
+      require('oil').setup {
+        default_file_explorer = true,
+        delete_to_trash = true,
+      }
+      vim.keymap.set('n', '<leader>t', function()
+        require('oil').open(vim.fn.getcwd())
+      end, { desc = 'Open Oil in cwd' })
+      vim.keymap.set('n', '<leader>f', require('oil').open, { desc = 'Open Oil in current [f]ile' })
+    end,
+  },
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following lua:
   --    require('gitsigns').setup({ ... })
@@ -304,6 +328,18 @@ require('lazy').setup({
         vim.keymap.set('n', '<leader>b', gs.blame_line, { desc = 'Blame the current line' })
       end,
     },
+  },
+  {
+    'rmagatti/auto-session',
+    lazy = false,
+    dependencies = {
+      'nvim-telescope/telescope.nvim',
+    },
+    config = function()
+      require('auto-session').setup {
+        auto_session_use_git_branch = true,
+      }
+    end,
   },
   {
     'NeogitOrg/neogit',
@@ -368,12 +404,17 @@ require('lazy').setup({
       require('which-key').setup()
 
       -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+      require('which-key').add {
+        { '<leader>c', group = '[C]ode' },
+        { '<leader>c_', hidden = true },
+        { '<leader>d', group = '[D]ocument' },
+        { '<leader>d_', hidden = true },
+        { '<leader>r', group = '[R]ename' },
+        { '<leader>r_', hidden = true },
+        { '<leader>s', group = '[S]earch' },
+        { '<leader>s_', hidden = true },
+        { '<leader>w', group = '[W]orkspace' },
+        { '<leader>w_', hidden = true },
       }
     end,
   },
@@ -503,6 +544,12 @@ require('lazy').setup({
     keys = { -- load the plugin only when using it's keybinding:
       { '<leader>u', "<cmd>lua require('undotree').toggle()<cr>" },
     },
+  },
+  {
+    'vuki656/package-info.nvim',
+    config = function()
+      require('package-info').setup()
+    end,
   },
 
   { -- LSP Configuration & Plugins
@@ -653,13 +700,21 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        tsserver = {},
         graphql = {},
         clangd = {},
+        pyright = {},
         tailwindcss = {},
-        eslint = {},
+        eslint = {
+          filetypes = { 'javascript', 'javascriptreact', 'javascript.jsx', 'typescript', 'typescriptreact', 'typescript.tsx', 'graphql' },
+          on_attach = function(client, bufnr)
+            vim.api.nvim_create_autocmd('BufWritePre', {
+              buffer = bufnr,
+              command = 'EslintFixAll',
+            })
+          end,
+        },
+        yamlls = {},
         verible = {},
-        --
 
         lua_ls = {
           -- cmd = {...},
@@ -723,14 +778,15 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'isort', 'black' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        javascript = { 'prettier', 'eslint_d' },
-        javascriptreact = { 'prettier', 'eslint_d' },
-        typescript = { 'prettier', 'eslint_d' },
-        typescriptreact = { 'prettier', 'eslint_d' },
+        javascript = { 'eslint_d' },
+        javascriptreact = { 'eslint_d' },
+        typescript = { 'eslint_d' },
+        typescriptreact = { 'eslint_d' },
+        graphql = { 'eslint_d' },
       },
     },
   },
@@ -851,6 +907,9 @@ require('lazy').setup({
   { 'luisiacc/gruvbox-baby' },
   { 'shatur/neovim-ayu' },
   { 'rebelot/kanagawa.nvim' },
+  { 'EdenEast/nightfox.nvim' },
+  { 'sainnhe/everforest' },
+  { 'rose-pine/neovim' },
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is
@@ -881,12 +940,24 @@ require('lazy').setup({
         'randomhue',
         'onenord-light',
         'onenord',
+        'everforest',
       }
       math.randomseed(os.time())
-      vim.cmd.colorscheme(possible_colorschemes[math.random(#possible_colorschemes)])
+      -- vim.cmd.colorscheme(possible_colorschemes[math.random(#possible_colorschemes)])
+      vim.cmd.colorscheme 'nordic'
 
       -- You can configure highlights by doing something like
       vim.cmd.hi 'Comment gui=none'
+    end,
+  },
+  {
+    dir = '~/quivr/translator',
+    name = 'translator',
+    config = function()
+      require('translator').setup()
+
+      vim.keymap.set('n', '<leader>S', require('translator').open, { desc = 'Open tran[S]lator' })
+      vim.keymap.set('n', '<leader>sS', require('translator').open_from_cursor, { desc = '[s]earch current  tran[S]lation' })
     end,
   },
 
@@ -972,7 +1043,7 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.indent_line',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
