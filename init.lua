@@ -216,7 +216,8 @@ vim.keymap.set('n', '<leader>gp', function()
   require('neogit').action('push', 'to_upstream')()
 end, { desc = 'Do a git push' })
 
-vim.keymap.set('n', '<leader>gv', ':!git add -A && git diff --cached | more <Enter>', { desc = 'Show current changes' })
+-- Show current changes
+vim.keymap.set('n', '<leader>gs', ':!git status | more <Enter>', { desc = 'Show current changes' })
 vim.keymap.set('n', '<leader>gd', function()
   require('neogit').open { 'diff' }
 end, { desc = 'Show current changes' })
@@ -225,7 +226,7 @@ vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { desc = 'Move the selected lines d
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { desc = 'Move the selected lines up' })
 
 vim.keymap.set('n', '<leader>t', '<Cmd>Neotree toggle<CR>', { desc = '[T]oggle Neotree' })
-vim.keymap.set('n', '<leader>f', '<Cmd>Neotree reveal<CR>', { desc = 'Reveal current [f]ile in Neotree' })
+-- vim.keymap.set('n', '<leader>f', '<Cmd>Neotree reveal<CR>', { desc = 'Reveal current [f]ile in Neotree' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -279,18 +280,28 @@ require('lazy').setup({
 
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
+  -- {
+  --   'zbirenbaum/copilot.lua',
+  --   cmd = 'Copilot',
+  --   event = 'InsertEnter',
+  --   config = function()
+  --     require('copilot').setup {
+  --       suggestion = { auto_trigger = true, keymap = { accept = 'Z' } },
+  --       filetypes = {
+  --         systemverilog = false,
+  --         -- python = false,
+  --         c = true,
+  --         ['*'] = true,
+  --       },
+  --     }
+  --   end,
+  -- },
   {
-    'zbirenbaum/copilot.lua',
-    cmd = 'Copilot',
-    event = 'InsertEnter',
+    'supermaven-inc/supermaven-nvim',
     config = function()
-      require('copilot').setup {
-        suggestion = { auto_trigger = true, keymap = { accept = 'Z' } },
-        filetypes = {
-          systemverilog = false,
-          -- python = false,
-          c = false,
-          ['*'] = true,
+      require('supermaven-nvim').setup {
+        keymaps = {
+          accept_suggestion = 'Z',
         },
       }
     end,
@@ -305,7 +316,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>t', function()
         require('oil').open(vim.fn.getcwd())
       end, { desc = 'Open Oil in cwd' })
-      vim.keymap.set('n', '<leader>f', require('oil').open, { desc = 'Open Oil in current [f]ile' })
+      -- vim.keymap.set('n', '<leader>f', require('oil').open, { desc = 'Open Oil in current [f]ile' })
     end,
   },
   -- Here is a more advanced example where we pass configuration
@@ -343,6 +354,8 @@ require('lazy').setup({
   },
   {
     'NeogitOrg/neogit',
+    -- Force this commit as there are more regressions lately
+    commit = '446197d90d179d579fa9c6970d4f98d494a2090b',
     dependencies = {
       'nvim-lua/plenary.nvim', -- required
       'sindrets/diffview.nvim', -- optional - Diff integration
@@ -700,6 +713,13 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
+        ts_ls = {
+          on_attach = function(client, bufnr)
+            -- Disable formatting so prettier or null-ls can take over
+            client.server_capabilities.documentFormattingProvider = false
+            client.server_capabilities.documentRangeFormattingProvider = false
+          end,
+        },
         graphql = {},
         clangd = {},
         pyright = {},
@@ -964,6 +984,48 @@ require('lazy').setup({
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
+  {
+    'mikavilpas/yazi.nvim',
+    event = 'VeryLazy',
+    dependencies = {
+      -- check the installation instructions at
+      -- https://github.com/folke/snacks.nvim
+      'folke/snacks.nvim',
+    },
+    keys = {
+      -- 👇 in this section, choose your own keymappings!
+      {
+        '<leader>f',
+        mode = { 'n', 'v' },
+        '<cmd>Yazi<cr>',
+        desc = 'Open yazi at the current file',
+      },
+      {
+        -- Open in the current working directory
+        '<leader>cw',
+        '<cmd>Yazi cwd<cr>',
+        desc = "Open the file manager in nvim's working directory",
+      },
+      {
+        '<c-up>',
+        '<cmd>Yazi toggle<cr>',
+        desc = 'Resume the last yazi session',
+      },
+    },
+    opts = {
+      -- if you want to open yazi instead of netrw, see below for more info
+      open_for_directories = false,
+      keymaps = {
+        show_help = '<f1>',
+      },
+    },
+    -- 👇 if you use `open_for_directories=true`, this is recommended
+    init = function()
+      -- More details: https://github.com/mikavilpas/yazi.nvim/issues/802
+      -- vim.g.loaded_netrw = 1
+      vim.g.loaded_netrwPlugin = 1
+    end,
+  },
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
