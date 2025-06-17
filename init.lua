@@ -720,6 +720,7 @@ require('lazy').setup({
             client.server_capabilities.documentRangeFormattingProvider = false
           end,
         },
+        ['markdownlint-cli2'] = {},
         graphql = {},
         clangd = {},
         pyright = {},
