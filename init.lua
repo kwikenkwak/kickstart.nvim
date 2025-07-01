@@ -130,7 +130,6 @@ vim.opt.signcolumn = 'yes'
 
 -- Decrease update time
 vim.opt.updatetime = 250
-
 -- Decrease mapped sequence wait time
 -- Displays which-key popup sooner
 vim.opt.timeoutlen = 1000
@@ -781,6 +780,8 @@ require('lazy').setup({
           end,
         },
       }
+      -- THERE SEEMS TO BE SOMETING WRONG WITH USING THE ABOVE CONFIGURATIONS :thinking_face:
+      require('lspconfig').eslint.setup(servers['eslint'])
     end,
   },
 
