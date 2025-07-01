@@ -719,7 +719,6 @@ require('lazy').setup({
             client.server_capabilities.documentRangeFormattingProvider = false
           end,
         },
-        ['markdownlint-cli2'] = {},
         graphql = {},
         clangd = {},
         pyright = {},
@@ -763,32 +762,36 @@ require('lazy').setup({
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
+      local ensure_installed_tools = vim.tbl_keys(servers or {})
+      vim.list_extend(ensure_installed_tools, {
         'stylua', -- Used to format lua code
+        'markdownlint-cli2',
       })
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+      require('mason-tool-installer').setup { ensure_installed = ensure_installed_tools }
 
       require('mason-lspconfig').setup {
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for tsserver)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
+        ensure_installed = ensure_installed,
       }
-      -- THERE SEEMS TO BE SOMETING WRONG WITH USING THE ABOVE CONFIGURATIONS :thinking_face:
-      require('lspconfig').eslint.setup(servers['eslint'])
+
+      local handler = function(server_name)
+        local server = servers[server_name] or {}
+        -- This handles overriding only values explicitly passed
+        -- by the server configuration above. Useful when disabling
+        -- certain features of an LSP (for example, turning off formatting for tsserver)
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+        require('lspconfig')[server_name].setup(server)
+      end
+
+      for server_name in pairs(servers) do
+        handler(server_name)
+      end
     end,
   },
 
   { -- Autoformat
     'stevearc/conform.nvim',
     opts = {
-      notify_on_error = false,
+      notify_on_error = true,
       fix_on_save = true,
       format_on_save = {
         timeout_ms = 500,
@@ -801,9 +804,7 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         python = { 'isort', 'black' },
-        --
-        -- You can use a sub-list to tell conform to run *until* a formatter
-        -- is found.
+        markdown = { 'markdownlint-cli2' },
         javascript = { 'eslint_d' },
         javascriptreact = { 'eslint_d' },
         typescript = { 'eslint_d' },
@@ -812,7 +813,23 @@ require('lazy').setup({
       },
     },
   },
+  {
+    'mfussenegger/nvim-lint',
+    event = { 'BufReadPost', 'BufWritePost' },
+    config = function()
+      local lint = require 'lint'
 
+      -- Register linters
+      lint.linters_by_ft = {
+        markdown = { 'markdownlint-cli2' },
+      }
+      vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufEnter', 'InsertLeave', 'TextChanged' }, {
+        callback = function()
+          require('lint').try_lint()
+        end,
+      })
+    end,
+  },
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
@@ -972,16 +989,16 @@ require('lazy').setup({
       vim.cmd.hi 'Comment gui=none'
     end,
   },
-  {
-    dir = '~/quivr/translator',
-    name = 'translator',
-    config = function()
-      require('translator').setup()
-
-      vim.keymap.set('n', '<leader>S', require('translator').open, { desc = 'Open tran[S]lator' })
-      vim.keymap.set('n', '<leader>sS', require('translator').open_from_cursor, { desc = '[s]earch current  tran[S]lation' })
-    end,
-  },
+  -- {
+  --   dir = '~/quivr/translator',
+  --   name = 'translator',
+  --   config = function()
+  --     require('translator').setup()
+  --
+  --     vim.keymap.set('n', '<leader>S', require('translator').open, { desc = 'Open tran[S]lator' })
+  --     vim.keymap.set('n', '<leader>sS', require('translator').open_from_cursor, { desc = '[s]earch current  tran[S]lation' })
+  --   end,
+  -- },
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
