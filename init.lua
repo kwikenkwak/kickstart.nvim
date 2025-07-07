@@ -413,3 +413,5 @@ require('lazy').setup({
   require 'kickstart.plugins.indent_line',
   { import = 'custom.plugins' },
 }, {})
+
+-- vim: ts=2 sts=2 sw=2 et
