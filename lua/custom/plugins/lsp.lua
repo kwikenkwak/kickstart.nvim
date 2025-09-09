@@ -53,6 +53,11 @@ return {
           --  To jump back, press <C-t>.
           map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
 
+          -- Jump to the definition of the word under your cursor. and open in a vertical split
+          -- map('gD', require('telescope.builtin').lsp_definitions { vertical = true }, '[G]oto [D]efinition (vertical)')
+
+          map('gD', ':vsplit | lua require("telescope.builtin").lsp_definitions()<CR>', '[G]oto [D]efinition (vertical)')
+
           -- Find references for the word under your cursor.
           map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
 
@@ -85,10 +90,6 @@ return {
           -- Opens a popup that displays documentation about the word under your cursor
           --  See `:help K` for why this keymap
           map('E', vim.lsp.buf.hover, 'Hover Documentation')
-
-          -- WARN: This is not Goto Definition, this is Goto Declaration.
-          --  For example, in C this would take you to the header
-          map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
@@ -165,6 +166,12 @@ return {
               validate = { enable = true },
             },
           },
+          on_attach = function(client, bufnr)
+            -- format
+            vim.keymap.set('n', '<leader>v', function()
+              vim.lsp.buf.format { async = true }
+            end, { buffer = bufnr, desc = 'LSP: Format buffer' })
+          end,
         },
         yamlls = {
           settings = {
